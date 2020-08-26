@@ -1,0 +1,18 @@
+Package: bayesdtm
+Title: A Bayesian Decision-Theoretic Model to Compute Expected Losses with and without an Intervention
+Date: 2020-08-26
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Akisato",
+           family = "Suzuki",
+           role = c("aut", "cre"),
+           email = "akisato.suzuki@gmail.com",
+           comment = c(ORCID = "0000-0003-3691-0236"))
+Description: This function implements a Bayesian decision-theoretic model to compute expected losses given an intervention and those without it, and returns the plot of these expected losses.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends: R (>= 3.6.0)
+Imports: ggplot2 (>= 3.3.0)
