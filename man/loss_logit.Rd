@@ -4,16 +4,30 @@
 \alias{loss_logit}
 \title{Compute expected losses based on Bayesian logistic regression}
 \usage{
-loss_logit(posterior, pi, md = 0, mu = 0)
+loss_logit(
+  posterior,
+  pi,
+  md = 0,
+  mu = 0,
+  unit = 1,
+  cp = 1,
+  ce = c(rep(101:10000)/100)
+)
 }
 \arguments{
-\item{posterior}{A vector of posterior samples for the estimated effect of an intervention}
+\item{posterior}{A numeric vector of posterior samples for the estimated effect of an intervention}
 
-\item{pi}{A baseline log odds value of an undesirable event}
+\item{pi}{A numeric value for the baseline log odds of an undesirable event}
 
-\item{md}{A minimum desired effect size in a log odds scale; default = 0}
+\item{md}{A numeric value for the minimum desired effect size in a log odds scale; default = 0}
 
-\item{mu}{A minimum undesired effect size in a log odds scale; default = 0}
+\item{mu}{A numeric value for the minimum undesired effect size in a log odds scale; default = 0}
+
+\item{unit}{A numeric value for the size of the unit change of interest in the intervention variable; default = 1}
+
+\item{cp}{A numeric value for the cost of an intervention; default = 1}
+
+\item{ce}{A numeric value or vector for the cost(s) of an undesirable outcome; default = c(rep(101:10000)/100)}
 }
 \value{
 A list having two elements: the first element is a data frame that has the expected losses given an intervention ("losses_i"), those given no intervention ("losses_noi"), and the ratio of the cost of the intervention to the cost of the undesirable event ("cost_ratio"); the second element is a ggplot object that plots the first element
@@ -26,15 +40,23 @@ logistic regression.
 This function implements a Bayesian decision-theoretic model for outputs from Bayesian
 logistic regression. It computes expected losses given an intervention (in causal inference
 senses) and those without it, across different ratios of the cost of the intervention to
-the cost of an undesirable event. More specifically, in the loss function the cost of an
-intervention is fixed at 1 while the cost of an undesirable event is changed from 1 to 100.
-So the ratio of the costs is from 0.01 to 1, and there are more data points the smaller
-the ratio.
+the cost of an undesirable event. For simplicity, the function computes this ratio by taking
+a fixed value for the cost of an intervention while taking a vector of various values for
+the cost of an undesirable outcome.
 
-There are two caveats in the setup of logistic regression. The binary dependent variable
-must be coded so that the value of 1 means an undesirable event and the value of 0 means
-a desirable event. Similarly, the variable of an intervention must be coded so that a
-larger value means an effect to reduce the likelihood of an undesirable event.
+There are two caveats in the setup of logistic regression. First, the binary dependent variable
+must be coded such that the value of 1 means an undesirable event and the value of 0 means
+a desirable event. Second, if a greater value of the intervention variable captures
+an intervention meant to increase the likelihood of an undesirable event, you need to specity
+a negative value for \code{unit}, the size of the unit change of interest, in the function, to
+indicate a decrease in the internvetion variable captures an intervention meant to reduce the
+likelihood of an undesirable event.
+
+If the variable of an intervention is a continuous / ordered variable, you can specify
+\code{unit}, the size of the unit change of interest, other than 1 (which is the default value).
+If it is a binary variable, the default value is fine (unless a value of 1 of the binary
+variable captures an intervention meant to increase the likelihood of an undesirable event,
+in which case \code{unit} must be -1).
 
 For a full example from estimating posterior samples to using the package, please see
 \href{https://akisatosuzuki.github.io/bayesdtm.html}{https://akisatosuzuki.github.io/bayesdtm.html}.
@@ -58,5 +80,12 @@ loss_logit(posterior = posterior, pi = pi)
 # Compute expected losses with specifying the minimum desired effect size
 # as an odds ratio of 0.8
 loss_logit(posterior = posterior, pi = pi, md = log(0.8))
+
+# If a value of one in the binary variable captures an intervention meant
+# to increase the likelihood of an undesirable event, specify -1 in unit
+loss_logit(posterior = posterior, pi = pi, unit = -1)
+
+# Change the ratio of the costs
+loss_logit(posterior = posterior, pi = pi, cp = 2, ce = rep(5:10))
 }
 }
