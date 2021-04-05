@@ -33,6 +33,15 @@
 #' Statistical Estimates: A General Bayesian Decision-Theoretic Model for Binary Outcomes."
 #' arXiv:2008.10903 \[stat.ME\]. https://arxiv.org/abs/2008.10903.}
 #'
+#' If you use this package, please cite the following items:
+#'
+#' Suzuki, Akisato. 2020. "Policy Implications of Statistical Estimates: A General Bayesian
+#' Decision-Theoretic Model for Binary Outcomes." arXiv:2008.10903 \[stat.ME\].
+#' https://arxiv.org/abs/2008.07478.
+#'
+#' Suzuki, Akisato. 2021. "bayesdtm: A Bayesian Decision-Theoretic Model to Compute Expected Losses
+#' with and without an Intervention." R package version 0.0.0.9002.
+#'
 #' @param posterior A numeric vector of posterior samples for the estimated effect of an intervention
 #' @param pi A numeric value for the baseline log odds of an undesirable event
 #' @param md A numeric value for the minimum desired effect size in a log odds scale; default = 0
