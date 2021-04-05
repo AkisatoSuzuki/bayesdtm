@@ -29,7 +29,7 @@ If you use this package, please cite the following items:
 
 Suzuki, Akisato. 2020. "Policy Implications of Statistical Estimates: A General Bayesian
 Decision-Theoretic Model for Binary Outcomes." arXiv:2008.10903 [stat.ME].
-https://arxiv.org/abs/2008.07478.
+https://arxiv.org/abs/2008.10903.
 
 Suzuki, Akisato. 2021. "bayesdtm: A Bayesian Decision-Theoretic Model to Compute Expected Losses
 with and without an Intervention." R package version 0.0.0.9002.
