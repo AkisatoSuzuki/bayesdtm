@@ -1,43 +1,36 @@
-#' Causal binary loss function model for Bayesian logistic regression
+#' Causal binary loss function model for Bayesian linear probability models
 #'
 #' This function implements the causal binary loss function model (Suzuki 2022)
-#' for Bayesian logistic regression.
+#' for Bayesian linear probability models.
 #'
 #' This function implements the causal binary loss function model (Suzuki 2022) for Bayesian
-#' logistic regression. It computes expected losses under an intervention (in causal inference
-#' senses) and those under no intervention (i.e., the status quo), across different ratios of
-#' the cost of the intervention to the cost of an undesirable outcome.
+#' linear probability models. It computes expected losses under an intervention (in causal inference
+#' senses) and those under no intervention (i.e., the status quo), across different ratios of the
+#' cost of the intervention to the cost of an undesirable outcome.
 #'
 #' For simplicity, the function computes these ratios by taking a fixed value for the cost of an
 #' intervention, while taking a vector of various values for the cost of an undesirable outcome.
 #'
-#' It is possible to specify the minimum desirable and undesirable effect sizes on the log odds ratio
+#' It is possible to specify the minimum desirable and undesirable effect sizes on the probability
 #' scale (\code{md} and \code{mu} respectively). If \code{md}=0, the strict inequality md<0 is assumed;
-#' otherwise the inequality <= and >= is assumed. The log odds ratio is simply the log of an odds
-#' ratio, so if the minimum desirable effect size is a reduction in the odds of an undesirable outcome
-#' by 5%, the odds ratio is 0.95 and the input for \code{md} is log(0.95). If the minimum desirable
-#' and undesirable effect sizes are considered on the probability scale, it will be necessary to find
-#' the corresponding (log) odds ratios, given a certain baseline value for the likelihood of an
-#' undesirable outcome, before using the function. As (log) odds ratios are relative measures of effects,
-#' while a probability difference is an absolute measure of effects, the corresponding (log) odds
-#' ratio for a certain probability difference will change as the baseline likelihood changes.
+#' otherwise the inequality <= and >= is assumed.
 #'
-#' One caveat in the setup of logistic regression is that the binary dependent variable
+#' One caveat in the setup of linear probability models is that the binary dependent variable
 #' must be coded such that the value of 1 means an undesirable outcome and the value of 0 means
-#' a desirable outcome.
+#' a desirable outcome
 #'
 #' If a greater value of the intervention variable captures an intervention meant to increase
 #' the likelihood of an undesirable outcome, you must specify a negative value for \code{unit},
 #' the size of the unit change of interest, in the function. In this way, a decrease in the
 #' intervetion variable captures an intervention meant to reduce the likelihood of an undesirable
-#' outcome.
+#' outcome
 #'
 #' If the variable of an intervention is a continuous / ordered variable, you can specify
 #' \code{unit}, the size of the unit change of interest, other than 1 (which is the default value).
 #'
 #' If the average treatment effect is the quantity of interest and there are more than one independent
-#' variable used in logistic regression, the vector should be created that is the sum of all covariates
-#' plus the posterior mean of their log odds ratio coefficients, and this should be used as an input
+#' variable used in a linear probability model, the vector should be created that is the sum of all
+#' covariates plus the posterior mean of their coefficients, and this should be used as an input
 #' for \code{pi}. The loss function will compute the predicted probability of the outcome for each
 #' observation and then will use their mean (the missing values in the vector, if any, will be
 #' removed).
@@ -62,9 +55,9 @@
 #' under an Intervention and the Status Quo." R package version 1.0.0.
 #'
 #' @param posterior A numeric vector of posterior samples for the estimated effect of the intervention
-#' @param pi A numeric value or vector for the baseline log odds of the undesirable outcome
-#' @param md A numeric value for the minimum desired effect size on the log odds ratio scale; default = 0
-#' @param mu A numeric value for the minimum undesired effect size on the log odds ratio scale; default = 0
+#' @param pi A numeric value or vector for the baseline likelihood of the undesirable outcome
+#' @param md A numeric value for the minimum desired effect size on the probability scale; default = 0
+#' @param mu A numeric value for the minimum undesired effect size on the probability scale; default = 0
 #' @param unit A numeric value for the size of the unit change of interest in the intervention variable; default = 1
 #' @param cp A numeric value for the cost of the intervention; default = 1
 #' @param ce A numeric value or vector for the cost(s) of the undesirable outcome; default = c(rep(101:10000)/100)
@@ -74,23 +67,23 @@
 #' @examples
 #' \dontrun{
 #' # Compute expected losses
-#' loss_logit(posterior = posterior, pi = pi)
+#' loss_lpm(posterior = posterior, pi = pi)
 #'
 #' # Compute expected losses with specifying the minimum desired effect size
-#' # as an odds ratio of 0.8
-#' loss_logit(posterior = posterior, pi = pi, md = log(0.8))
+#' # as a probability difference of 0.1
+#' loss_lpm(posterior = posterior, pi = pi, md = 0.1)
 #'
 #' # If a value of one in the binary variable captures an intervention meant
 #' # to increase the likelihood of an undesirable outcome, specify -1 in unit
-#' loss_logit(posterior = posterior, pi = pi, unit = -1)
+#' loss_lpm(posterior = posterior, pi = pi, unit = -1)
 #'
 #' # Change the ratio of the costs
-#' loss_logit(posterior = posterior, pi = pi, cp = 2, ce = rep(5:10))
+#' loss_lpm(posterior = posterior, pi = pi, cp = 2, ce = rep(5:10))
 #' }
 #' @export
 
 
-loss_logit <- function(posterior, pi, md=0, mu=0, unit=1, cp=1, ce=c(rep(101:10000)/100)){
+loss_lpms <- function(posterior, pi, md=0, mu=0, unit=1, cp=1, ce=c(rep(101:10000)/100)){
 
 
   # Identify incorrect inputs
@@ -144,7 +137,7 @@ loss_logit <- function(posterior, pi, md=0, mu=0, unit=1, cp=1, ce=c(rep(101:100
   # Define the loss function
   loss <- function(c_p, c_e, i, pi, theta_int, p, theta_unint, q){
     c_p*i + c_e*mean(
-      1/(1+exp(-(pi+theta_int*p*i+theta_unint*q*i))), na.rm = TRUE
+      pi+theta_int*p*i+theta_unint*q*i, na.rm = TRUE
     )
   }
 
@@ -159,7 +152,7 @@ loss_logit <- function(posterior, pi, md=0, mu=0, unit=1, cp=1, ce=c(rep(101:100
   }
   else{
     theta_int <- ifelse(length(posterior[posterior<=md])>0,
-                         mean(posterior[posterior<=md]), 0)
+                        mean(posterior[posterior<=md]), 0)
   }
   theta_unint <- ifelse(length(posterior[posterior>=mu])>0,
                         mean(posterior[posterior>=mu]), 0)
